@@ -7,6 +7,30 @@ description: 根据真实 diff 生成规范的 commit message 和 PR/MR 描述�
 
 产物必须**只描述真实发生过的改动**：先取 diff，再写文字。禁止凭记忆编造"已修复 X"。
 
+## 使用方法
+
+**你会怎么说**
+- `提交这些改动` / `帮我写 commit message`
+- `生成这个 PR 的描述`
+- `看看我这次提交有没有不该进来的东西`
+
+**我需要什么**（缺了先问，不猜）
+- 哪些改动属于这次提交（工作区可能混着无关文件）
+- 目标分支、关联 issue 号
+- 偏好：中文还是英文、要不要 scope 前缀（没有偏好就跟随 `git log` 既有风格）
+
+**我会跑**
+```bash
+git status --short
+git diff --stat && git diff && git diff --staged
+git log --oneline -10            # 既有 message 风格
+git log --oneline origin/HEAD..  # 本分支已有的提交
+```
+
+**产出**：先展示 commit message（或 PR 正文），你确认后我才执行 `git commit` / 创建 PR
+
+**边界**：不用 `git add -A`、不 `--no-verify`、不 force push；卫生检查发现问题先报给你
+
 ## 1. 取事实
 
 ```bash

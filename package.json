@@ -1,7 +1,7 @@
 {
   "name": "dsh-coding-skills",
-  "version": "0.1.0",
-  "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor planning, debugging, release notes.",
+  "version": "0.2.0",
+  "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor planning, debugging, test strategy, performance investigation, release notes.",
   "keywords": [
     "dsh",
     "dsh-bundle",
@@ -9,6 +9,8 @@
     "code-review",
     "refactor",
     "debugging",
+    "testing",
+    "performance",
     "git",
     "changelog"
   ],
