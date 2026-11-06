@@ -21,7 +21,7 @@
 ## 在 DeepSeek Harness 里安装
 
 ```bash
-dsh plugin install github:devwangxiaogang/dsh-coding-skills#v0.3.0
+dsh plugin install github:devwangxiaogang/dsh-coding-skills#v0.3.1
 ```
 
 也可以直接让 agent `install_bundle` 这个 spec。安装后技能出现在目录里，按需加载。
@@ -30,25 +30,44 @@ Windows 上升级时若 pnpm 报 `ERR_PNPM_EPERM`（重命名已有安装目录�
 
 ```
 plugin_manager remove_bundle  target=dsh-coding-skills
-plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.3.0
+plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.3.1
+```
+
+如果这台机器访问不了 `https://github.com`（`git ls-remote` 报 `Recv failure: Connection was reset`，或安装时报 `connection to github.com timed out after 5000ms`），`github:` spec 会在探测阶段就失败。改用 SSH 形式安装，profile 里仍会记成规范的 `github:` spec：
+
+```
+plugin_manager install_bundle target=git+ssh://git@github.com/devwangxiaogang/dsh-coding-skills.git#v0.3.1
 ```
 
 ## 在其它 AI 工具里使用
 
-同一份 Markdown 可以直接用在 Claude Code、Cursor、Windsurf、Cline/Roo、GitHub Copilot、Codex CLI（`AGENTS.md`）、Gemini CLI、Aider，以及任何聊天窗口。`docs/using-with-other-ai-tools.md` 说明了每个工具把规则放在哪、frontmatter 有哪些字段、以及怎么验证规则确实生效。
-
-不想手抄就用导出脚本：
+同一份 Markdown 可以直接用在 Claude Code、Cursor、Windsurf、Cline/Roo、GitHub Copilot、Codex CLI（`AGENTS.md`）、Gemini CLI、Aider、Continue，以及任何聊天窗口。先把文件拿到手，再导出成各工具的原生格式：
 
 ```bash
-node scripts/export-rules.mjs --list                      # 列出技能
-node scripts/export-rules.mjs --target claude  --out .    # 生成 .claude/skills/<name>/SKILL.md
-node scripts/export-rules.mjs --target cursor  --out .    # 生成 .cursor/rules/<name>.mdc（带 globs）
-node scripts/export-rules.mjs --target all     --out .exported
+git clone --depth 1 --branch v0.3.1 https://github.com/devwangxiaogang/dsh-coding-skills.git /tmp/dcs
+REPO=/tmp/dcs
+# 或者直接复用 DSH 已装好的那份：
+#   REPO="$DSH_HOME/profiles/desktop/node_modules/dsh-coding-skills"
+
+node "$REPO/scripts/export-rules.mjs" --list
 ```
 
-目标：`claude`、`cursor`、`windsurf`、`cline`、`copilot`、`agents`、`gemini`、`aider`、`all`。除 Node 18 外无依赖，脚本只读 `skills/`、只写目标文件。
+| 工具 | 命令（在目标仓库根目录执行） | 产出 |
+| --- | --- | --- |
+| Claude Code | `--target claude --out .` | `.claude/skills/<name>/SKILL.md`，逐字节复制；个人机器用 `--out "$HOME"` |
+| Cursor | `--target cursor` | `.cursor/rules/<name>.mdc`，带 `description` / `globs` / `alwaysApply: false` |
+| Windsurf | `--target windsurf` | `.windsurf/rules/<name>.md`，`trigger: model_decision` |
+| Cline / Roo | `--target cline` | `.clinerules/<name>.md`（Roo 改放 `.roo/rules/`） |
+| GitHub Copilot | `--target copilot` | `.github/copilot-instructions.md`；要按路径命中就拆成 `.github/instructions/*.instructions.md` + `applyTo` |
+| Codex CLI / OpenCode / Amp | `--target agents` | `AGENTS.md` |
+| Gemini CLI | `--target gemini` | 瘦身版 `GEMINI.md`，用 `@` 引入 `skills/<name>/SKILL.md` |
+| Aider | `--target aider` | `CONVENTIONS.md`（配合 `.aider.conf.yml` 的 `read: [CONVENTIONS.md]`） |
+| Continue | `--target cline` 后移动 | `.continue/rules/*.md` |
+| 全部 | `--target all --out .exported` | 40 个文件，先看再拷 |
 
-比格式更重要的一条：能用"按需命中"就不要用"始终生效"。九份常驻规则会把代码从上下文窗口里挤出去；一份在命中场景时才加载的规则不会。
+逐工具的安装步骤、项目级与全局路径、以及验证规则真生效的三步法：`docs/using-with-other-ai-tools.md`。
+
+比格式更重要的两条：生成物是构建产物，要改就改 `skills/<name>/SKILL.md` 再重新导出；能用「按需命中」就不要用「始终生效」，九份常驻规则会把代码从上下文窗口里挤出去。
 
 ## 新增一个技能
 

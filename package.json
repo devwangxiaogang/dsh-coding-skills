@@ -1,6 +1,6 @@
 {
   "name": "dsh-coding-skills",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor and migration planning, debugging, test strategy, performance investigation, API design, release notes. Ships an exporter for other AI tools.",
   "keywords": [
     "dsh",

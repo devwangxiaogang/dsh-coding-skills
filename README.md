@@ -21,7 +21,7 @@ Each skill is one Markdown file with a fixed shape: when to use it, what it need
 ## Install in DeepSeek Harness
 
 ```bash
-dsh plugin install github:devwangxiaogang/dsh-coding-skills#v0.3.0
+dsh plugin install github:devwangxiaogang/dsh-coding-skills#v0.3.1
 ```
 
 Or ask the agent to `install_bundle` this spec. Skills appear in the catalog and load on demand.
@@ -30,25 +30,44 @@ Upgrading on Windows: if pnpm reports `ERR_PNPM_EPERM` when renaming an existing
 
 ```
 plugin_manager remove_bundle  target=dsh-coding-skills
-plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.3.0
+plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.3.1
+```
+
+If the host cannot reach `https://github.com` (`git ls-remote` → `Recv failure: Connection was reset`, or an install that fails with `connection to github.com timed out after 5000ms`), the `github:` spec dies at its host probe. Install over SSH instead — the profile still records the canonical `github:` spec:
+
+```
+plugin_manager install_bundle target=git+ssh://git@github.com/devwangxiaogang/dsh-coding-skills.git#v0.3.1
 ```
 
 ## Using with other AI tools
 
-The same Markdown works in Claude Code, Cursor, Windsurf, Cline/Roo, GitHub Copilot, Codex CLI (`AGENTS.md`), Gemini CLI, Aider, and any chat window. `docs/using-with-other-ai-tools.md` explains where each tool looks for rules, what its frontmatter requires, and how to verify a rule actually fires.
-
-To generate the files instead of copying by hand:
+The bundle is plain Markdown, so the same files work in Claude Code, Cursor, Windsurf, Cline/Roo, GitHub Copilot, Codex CLI (`AGENTS.md`), Gemini CLI, Aider, Continue, or a plain chat window. Get the files once, then export them into that tool's native format:
 
 ```bash
-node scripts/export-rules.mjs --list                      # show the skills
-node scripts/export-rules.mjs --target claude  --out .    # .claude/skills/<name>/SKILL.md
-node scripts/export-rules.mjs --target cursor  --out .    # .cursor/rules/<name>.mdc with globs
-node scripts/export-rules.mjs --target all     --out .exported
+git clone --depth 1 --branch v0.3.1 https://github.com/devwangxiaogang/dsh-coding-skills.git /tmp/dcs
+REPO=/tmp/dcs
+# or reuse the copy DSH already installed:
+#   REPO="$DSH_HOME/profiles/desktop/node_modules/dsh-coding-skills"
+
+node "$REPO/scripts/export-rules.mjs" --list
 ```
 
-Targets: `claude`, `cursor`, `windsurf`, `cline`, `copilot`, `agents`, `gemini`, `aider`, `all`. No dependencies beyond Node 18; the script only reads `skills/` and writes the target files.
+| Tool | Command (run in your project) | Writes |
+| --- | --- | --- |
+| Claude Code | `--target claude --out .` | `.claude/skills/<name>/SKILL.md`, verbatim; `--out "$HOME"` for the personal scope |
+| Cursor | `--target cursor` | `.cursor/rules/<name>.mdc` with `description` / `globs` / `alwaysApply: false` |
+| Windsurf | `--target windsurf` | `.windsurf/rules/<name>.md` with `trigger: model_decision` |
+| Cline / Roo | `--target cline` | `.clinerules/<name>.md` (`mv` to `.roo/rules/` for Roo) |
+| GitHub Copilot | `--target copilot` | `.github/copilot-instructions.md`; split into `.github/instructions/*.instructions.md` + `applyTo` for path scoping |
+| Codex CLI / OpenCode / Amp | `--target agents` | `AGENTS.md` |
+| Gemini CLI | `--target gemini` | slim `GEMINI.md` that `@`-imports `skills/<name>/SKILL.md` |
+| Aider | `--target aider` | `CONVENTIONS.md` (+ `read: [CONVENTIONS.md]` in `.aider.conf.yml`) |
+| Continue | `--target cline` then move | `.continue/rules/*.md` |
+| everything | `--target all --out .exported` | 40 files; review before copying into the project |
 
-One rule that matters more than the format: prefer on-demand rules over always-on ones. Nine always-on rule files crowd the code out of the context window; a per-skill file that loads when it applies does not.
+Per-tool install steps, project-level vs global paths, and a three-step way to verify a rule actually fires: `docs/using-with-other-ai-tools.md`.
+
+Two things that matter more than the file format: generated files are build outputs, so edit `skills/<name>/SKILL.md` and re-export; and prefer on-demand rules over always-on ones — nine always-on rule files crowd the code out of the context window.
 
 ## Adding a skill
 
