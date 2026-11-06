@@ -1,18 +1,22 @@
 {
   "name": "dsh-coding-skills",
-  "version": "0.2.0",
-  "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor planning, debugging, test strategy, performance investigation, release notes.",
+  "version": "0.3.0",
+  "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor and migration planning, debugging, test strategy, performance investigation, API design, release notes. Ships an exporter for other AI tools.",
   "keywords": [
     "dsh",
     "dsh-bundle",
     "skills",
     "code-review",
     "refactor",
+    "migration",
     "debugging",
     "testing",
     "performance",
+    "api-design",
     "git",
-    "changelog"
+    "changelog",
+    "claude-code",
+    "cursor"
   ],
   "repository": {
     "type": "git",
@@ -25,6 +29,9 @@
   "license": "MIT",
   "author": "wangxiaogang",
   "icon": "./icon.svg",
+  "bin": {
+    "dsh-coding-skills-export": "./scripts/export-rules.mjs"
+  },
   "exports": {
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json",
@@ -35,6 +42,8 @@
     "locale/*.json",
     "icon.svg",
     "skills",
+    "docs",
+    "scripts",
     "LICENSE",
     "README.md",
     "README.zh.md"

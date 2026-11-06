@@ -1,4 +1,5 @@
 node_modules/
+.exported/
 *.zip
 *.log
 .DS_Store

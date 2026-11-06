@@ -1,88 +1,71 @@
 # dsh-coding-skills
 
-Language-agnostic software-engineering skills for [DeepSeek Harness](https://github.com/deepseek-ai), packaged as a DSH skill bundle. Complements domain bundles such as `dsh-android-skills`: this one covers the parts of daily work that are the same in every stack.
+Language-agnostic software-engineering skills for the DeepSeek Harness (DSH) agent: how to review a change, write a commit, plan a refactor or a migration, debug a failure, decide what to test, investigate performance, design an API, and cut a release.
+
+Each skill is one Markdown file with a fixed shape: when to use it, what it needs from you, the steps it will take, the output it produces, and what it deliberately does not do. They are plain process discipline — no language, framework, or tool lock-in.
 
 ## Skills
 
-| Skill | Use it when |
-|---|---|
-| `code-review` | Reviewing a diff, commit, or PR; before merging |
-| `commit-and-pr` | Writing a commit message, PR/MR description, pre-commit hygiene check |
-| `refactor-plan` | A change is too big for one step; splitting a god class; migrating an API |
-| `debug-repro` | Something fails and you need a minimal reproduction, root cause, and regression test |
-| `test-strategy` | Deciding what to test, at which layer, and how much is enough |
-| `perf-investigate` | Something is slow, memory-heavy, or slow to start — measure before optimizing |
-| `release-notes` | Cutting a release, writing a changelog, deciding the next version number |
+| Skill | What it does | Typical trigger |
+| --- | --- | --- |
+| `code-review` | Reviews a diff / commit / PR, graded Blocker → Major → Minor, every finding anchored to `path:line` with a concrete consequence. | 审查代码 / review this PR |
+| `commit-and-pr` | Turns the real diff into a Conventional Commit message and a PR body, after a pre-commit hygiene pass (stray files, debug leftovers, secrets, mixed concerns). | 提交 / write a commit message |
+| `refactor-plan` | Splits a large risky change into steps that are each mergeable, revertible, verifiable, and ≤300 lines. | 重构 / split this god class |
+| `migration-plan` | Plans dependency / runtime / framework / schema / platform migrations: compatibility matrix, rollback-able phases, backfill and verification. | 迁移 / upgrade to v5 |
+| `debug-repro` | From verbatim error → minimal repro → bisect → fix → regression test that fails before and passes after. | 报错 / why is this failing |
+| `test-strategy` | Decides what to test, at which layer, and how much is enough; coverage and flaky-test policy. | 该写哪些测试 / unit or e2e |
+| `perf-investigate` | Measure before optimizing: named metric, budget, reproducible baseline, hot-spot ranking, one change at a time with a before/after table. | 太慢了 / 内存占用高 |
+| `api-design` | Endpoint and SDK surface design: naming, shape, validation, error envelope, pagination, compatibility rules. | 接口设计 / error codes |
+| `release-notes` | Builds release notes from the actual commit range, plus breaking-change upgrade notes and a semver verdict. | 发版 / changelog |
 
-## How to use
+## Install in DeepSeek Harness
 
-Each skill is triggered by what you say, not by a command. The `description` in its frontmatter is the only text used for matching, so plain phrasing works — in Chinese or English.
-
-| Skill | Say something like | Best if you also give | You get back |
-|---|---|---|---|
-| `code-review` | "review my uncommitted changes", "check commit 3f2a1c", "can this PR merge?" | the range (working tree / sha / base...HEAD / PR) and any focus (concurrency, security) | verdict first, then Blocker / Major / Minor findings, each with `path:line` and the concrete consequence |
-| `commit-and-pr` | "commit this", "write the PR description" | which files belong to this change, target branch, issue number | message or PR body shown for confirmation, plus a pre-commit hygiene report |
-| `refactor-plan` | "this class is too big", "how do I migrate A to B" | the pain point, the contracts that must not change, how many steps you can ship | baseline + Step 1..N, each independently mergeable, revertible, and verifiable |
-| `debug-repro` | "this command fails", "this test is flaky" | the verbatim error, how to trigger it, environment, recent commits | phenomenon / minimal repro / root cause / fix / verification, with a test that fails before and passes after |
-| `test-strategy` | "how should I test this", "our CI is slow/flaky" | the module, its historical bugs, CI time budget | layer allocation table plus an ordered "write these N tests first" list |
-| `perf-investigate` | "this endpoint is slow", "startup takes 4s" | which metric, current vs target, measurement conditions | baseline table, ranked hotspots with evidence, before/after comparison, and whether it cleared the noise |
-| `release-notes` | "prep a release", "what version number" | the range (or let it read the last tag) and the audience | changelog with a version verdict, breaking changes spelled out as what/who/how to upgrade |
-
-Every skill follows the same discipline, which is the actual value here:
-
-- Findings and notes must cite `path:line` and the concrete consequence; no preference-only nitpicks, no "fixed a bug".
-- Commit and PR text may only describe changes that exist in the diff, and "verification" may only list commands that were really run.
-- Refactors need a green baseline and a characterization test before structure moves.
-- Debugging needs a reproduction that fails before the fix and passes after; "cannot reproduce" is a valid, stated outcome.
-- Tests count only if they can fail; coverage is a list of unexecuted code, not a score.
-- Performance work starts from a number: no profile, no optimization list; changes below the noise floor are reverted.
-- Anything ambiguous in a release is treated as breaking, and must state how to upgrade.
-
-Each `skills/<name>/SKILL.md` opens with a `## 使用方法` section: the phrases that trigger it, what input it needs, the actual commands it runs, and what it produces.
-
-## Install
-
-From the DSH plugin manager, by GitHub tag:
-
-```
-plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.2.0
+```bash
+dsh plugin install github:devwangxiaogang/dsh-coding-skills#v0.3.0
 ```
 
-Or add it to a profile directly:
+Or ask the agent to `install_bundle` this spec. Skills appear in the catalog and load on demand.
 
-```json
-{
-  "dependencies": {
-    "dsh-coding-skills": "github:devwangxiaogang/dsh-coding-skills#v0.2.0"
-  },
-  "dsh": { "profile": { "bundles": ["dsh-coding-skills"] } }
-}
-```
-
-The bundle inserts one `@deepseek-ai/dsh-skill-filesystem` row with `providerName: coding-skills`, pointing at its own `skills/` directory.
-
-### Upgrading on Windows
-
-pnpm cannot rename a package directory over an existing one, so switching versions in place fails with:
+Upgrading on Windows: if pnpm reports `ERR_PNPM_EPERM` when renaming an existing install directory, remove the bundle first and then install the new tag:
 
 ```
-[ERR_PNPM_EPERM] [importPackage ...\node_modules\dsh-coding-skills] EPERM: operation not permitted,
-rename '...\dsh-coding-skills_tmp_<pid>_<n>' -> '...\dsh-coding-skills'
+plugin_manager remove_bundle  target=dsh-coding-skills
+plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.3.0
 ```
 
-Remove first, then install:
+## Using with other AI tools
 
-```
-plugin_manager remove_bundle target=dsh-coding-skills
-plugin_manager install_bundle target=github:devwangxiaogang/dsh-coding-skills#v0.2.0
+The same Markdown works in Claude Code, Cursor, Windsurf, Cline/Roo, GitHub Copilot, Codex CLI (`AGENTS.md`), Gemini CLI, Aider, and any chat window. `docs/using-with-other-ai-tools.md` explains where each tool looks for rules, what its frontmatter requires, and how to verify a rule actually fires.
+
+To generate the files instead of copying by hand:
+
+```bash
+node scripts/export-rules.mjs --list                      # show the skills
+node scripts/export-rules.mjs --target claude  --out .    # .claude/skills/<name>/SKILL.md
+node scripts/export-rules.mjs --target cursor  --out .    # .cursor/rules/<name>.mdc with globs
+node scripts/export-rules.mjs --target all     --out .exported
 ```
 
-This is a filesystem rename limitation, not a permissions problem — do not go changing directory ACLs.
+Targets: `claude`, `cursor`, `windsurf`, `cline`, `copilot`, `agents`, `gemini`, `aider`, `all`. No dependencies beyond Node 18; the script only reads `skills/` and writes the target files.
+
+One rule that matters more than the format: prefer on-demand rules over always-on ones. Nine always-on rule files crowd the code out of the context window; a per-skill file that loads when it applies does not.
 
 ## Adding a skill
 
-Create `skills/<name>/SKILL.md` with `name` and `description` in the frontmatter — `description` is the only text used for matching, so write the words a user would actually type. `watch: true` is set in the row, so edits apply without reinstalling.
+1. Create `skills/<name>/SKILL.md`. The directory name must equal the frontmatter `name`.
+2. Frontmatter is exactly two fields:
+
+```yaml
+---
+name: my-skill
+description: 一句话说明它做什么。Use when <English triggers>, or 中文触发词。
+---
+```
+
+3. Body sections: `## 使用方法` (你会怎么说 / 我需要什么 / 我会跑 / 产出 + 边界) first, then numbered `## 1.` steps, a fenced example of the output, and `## 边界` listing what it does not cover.
+4. Add the name to `GLOBS` in `scripts/export-rules.mjs` if it should attach to specific file patterns in Cursor/Windsurf.
+5. Bump the version, update both READMEs and `locale/*.json`, tag, push.
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](LICENSE).

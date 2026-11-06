@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Coding Skills",
-    "description": "Language-agnostic engineering workflow skills: code review, commit & PR writing, refactor planning, debugging, test strategy, performance investigation, release notes."
+    "description": "Language-agnostic engineering workflow skills: code review, commit & PR writing, refactor planning, migration planning, debugging, test strategy, performance investigation, API design, release notes."
   }
 }
