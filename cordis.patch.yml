@@ -1,0 +1,8 @@
+- insert:
+    - id: coding-skills-filesystem
+      name: '@deepseek-ai/dsh-skill-filesystem'
+      config:
+        providerName: coding-skills
+        includeDefaultRoots: false
+        watch: true
+        bundledSkillDir: !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:url').fileURLToPath(baseUrl), 'node_modules', 'dsh-coding-skills', 'skills')

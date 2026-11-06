@@ -1,0 +1,45 @@
+{
+  "name": "dsh-coding-skills",
+  "version": "0.1.0",
+  "description": "Language-agnostic software-engineering skills for DeepSeek Harness: code review, commit/PR writing, refactor planning, debugging, release notes.",
+  "keywords": [
+    "dsh",
+    "dsh-bundle",
+    "skills",
+    "code-review",
+    "refactor",
+    "debugging",
+    "git",
+    "changelog"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devwangxiaogang/dsh-coding-skills.git"
+  },
+  "homepage": "https://github.com/devwangxiaogang/dsh-coding-skills#readme",
+  "bugs": {
+    "url": "https://github.com/devwangxiaogang/dsh-coding-skills/issues"
+  },
+  "license": "MIT",
+  "author": "wangxiaogang",
+  "icon": "./icon.svg",
+  "exports": {
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "skills",
+    "LICENSE",
+    "README.md",
+    "README.zh.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
